@@ -1,7 +1,9 @@
 #!/bin/bash
 
 print_usage() {
-	echo "Here are the args you can use."
+	echo "Usage: launch.sh [OPTIONS]"
+	echo -e "  --workdir\t\tSet the directory to run the build."
+	echo -e "  --h, --help\t\tDisplay this help and exit."
 }
 
 while [[ $# -gt 0 ]]; do
@@ -43,8 +45,26 @@ launch_docker_build() {
 	docker pull crops/poky
 
 	mkdir -p $WORK_DIR
+
+	echo "docker run \
+		--rm \
+		-it \
+		--cpus=$(nproc --all) \
+		-v "$(realpath $(dirname $(dirname $0)))":/usr/bin/bb \
+		-v $WORK_DIR:/workdir \
+		crops/poky \
+			--workdir=/workdir \
+			/usr/bin/bb/build.sh"
 	
-	docker run --rm -it -v $WORK_DIR:/workdir crops/poky --workdir=/workdir
+	docker run \
+		--rm \
+		-it \
+		--cpus=$(nproc --all) \
+		-v "$(realpath $(dirname $(dirname $0)))":/usr/bin/bb \
+		-v $WORK_DIR:/workdir \
+		crops/poky \
+			--workdir=/workdir \
+			/usr/bin/bb/scripts/build.sh
 }
 
 verify_settings() {
